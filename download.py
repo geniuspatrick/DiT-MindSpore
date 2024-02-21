@@ -39,8 +39,11 @@ def download_model(model_name):
         os.makedirs('pretrained_models', exist_ok=True)
         web_path = f'https://dl.fbaipublicfiles.com/DiT/models/{model_name}'
         download_url(web_path, 'pretrained_models')
-    model = torch.load(local_path, map_location=lambda storage, loc: storage)
-    return model
+    state_dict = torch.load(local_path, map_location=lambda storage, loc: storage)
+    import numpy as np
+    state_dict_np = {k: v.numpy() for k, v in state_dict.items()}
+    np.save(f"{os.path.splitext(local_path)[0]}.npy", state_dict_np)
+    return state_dict
 
 
 if __name__ == "__main__":

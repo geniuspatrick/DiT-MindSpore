@@ -4,7 +4,8 @@
 #     IDDPM: https://github.com/openai/improved-diffusion/blob/main/improved_diffusion/gaussian_diffusion.py
 
 import numpy as np
-import torch as th
+import mindspore as ms
+from mindspore import ops, Tensor
 
 from .gaussian_diffusion import GaussianDiffusion
 
@@ -114,6 +115,7 @@ class SpacedDiffusion(GaussianDiffusion):
         return t
 
 
+@ms.jit_class
 class _WrappedModel:
     def __init__(self, model, timestep_map, original_num_steps):
         self.model = model
@@ -122,7 +124,7 @@ class _WrappedModel:
         self.original_num_steps = original_num_steps
 
     def __call__(self, x, ts, **kwargs):
-        map_tensor = th.tensor(self.timestep_map, device=ts.device, dtype=ts.dtype)
+        map_tensor = Tensor(self.timestep_map, dtype=ts.dtype)
         new_ts = map_tensor[ts]
         # if self.rescale_timesteps:
         #     new_ts = new_ts.float() * (1000.0 / self.original_num_steps)
